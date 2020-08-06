@@ -18,26 +18,33 @@ module Spree
     end
 
     define_method('default-permissions') do |current_ability, user|
-      current_ability.can [:read, :update, :destroy], Spree.user_class
-
-      current_ability.can [:read, :update], Spree::Order, { user_id: user.id }
-
+      current_ability.can :read, Spree::Country
+      current_ability.can :read, Spree::OptionType
+      current_ability.can :read, Spree::OptionValue
       current_ability.can :create, Spree::Order
-
-      current_ability.can :read, Spree::Order, [] do |order, token|
-        order.user == user || (order.token && token == order.token)
+      current_ability.can :show, Spree::Order do |order, token|
+        order.user == user || order.token && token == order.token
       end
-
       current_ability.can :update, Spree::Order do |order, token|
         !order.completed? && (order.user == user || order.token && token == order.token)
       end
-
-      current_ability.can :read, Spree::Address do |address|
+      current_ability.can :manage, Spree::Address do |address|
         address.user == user
       end
-      current_ability.can [:read], Spree::State
-      current_ability.can [:read], Spree::Country
-
+      current_ability.can :create, Spree::Address do |_address|
+        user.id.present?
+      end
+      current_ability.can :read, Spree::CreditCard, user_id: user.id
+      current_ability.can :read, Spree::Product
+      current_ability.can :read, Spree::ProductProperty
+      current_ability.can :read, Spree::Property
+      current_ability.can :create, Spree.user_class
+      current_ability.can [:show, :update, :destroy], Spree.user_class, id: user.id
+      current_ability.can :read, Spree::State
+      current_ability.can :read, Spree::Taxon
+      current_ability.can :read, Spree::Taxonomy
+      current_ability.can :read, Spree::Variant
+      current_ability.can :read, Spree::Zone
     end
 
     define_method('default-admin-permissions') do |current_ability, user|
